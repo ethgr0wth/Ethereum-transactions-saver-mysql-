@@ -25,11 +25,23 @@ const connection = mysql.createConnection({
 });
 connection.connect();
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 
 // Async because we like to wait for processes
 (async () => {
     // First transaction on the contract ever was in this block
     var block = 19762757;
+
+    var waitForSelect = true;
+    // Or if we already have a database
+    connection.query("SELECT * FROM `transactions` ORDER BY `blockNumber` DESC LIMIT 1", function(error, results, fields) {
+        if (typeof results[0] !== "undefined") {
+            block = results[0].blockNumber;
+        }
+        waitForSelect = false;
+    });
+    while (waitForSelect) { await delay(1000); };
     while (true) {
         // Receive all transactions from `block` with a maximum of 10.000
         const response = await fetch('https://api-testnet.polygonscan.com/api?module=account&action=txlist&address=0xdcfddb06af6f1a8d4be001c43b0f3e29bfbd96db&startblock=' + block.toString() + '&endblock=99999999&sort=asc');
