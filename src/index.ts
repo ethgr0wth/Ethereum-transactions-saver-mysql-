@@ -58,6 +58,12 @@ connection.connect();
             // Decode the transaction data
             transaction.data = decoder.decodeData(transaction.input);
 
+            // Gets parent microbuddy out of replication data
+            var parentMicrobuddy = 0;
+            if (transaction.data.method === "replicate" || transaction.data.method === "simpleReplicate") {
+                parentMicrobuddy = transaction.data.inputs[0].words[0];
+            }
+
             // Create a new transaction object specifically containing the block number, timestamp when the transaction was, hash of the transaction, and the data
             transactions.push([
                 transaction.blockNumber,
@@ -66,12 +72,13 @@ connection.connect();
                 transaction.data.method,
                 JSON.stringify(transaction.data.types),
                 JSON.stringify(transaction.data.inputs),
-                JSON.stringify(transaction.data.names)
+                JSON.stringify(transaction.data.names),
+                parentMicrobuddy
             ]);
         }
 
         // Put all the transactions into the database
-        const query = connection.query('INSERT IGNORE INTO transactions (blockNumber, timestamp, hash, method, types, inputs, names) VALUES ?', [transactions], (error, results, fields) => {
+        const query = connection.query('INSERT IGNORE INTO transactions (blockNumber, timestamp, hash, method, types, inputs, names, parentmicrobuddy) VALUES ?', [transactions], (error, results, fields) => {
             
             // if there is an error show what the transactions were and show the error (for debugging purposes)
             if (error) {
