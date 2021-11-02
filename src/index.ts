@@ -115,8 +115,5 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         console.log("Waiting 60 seconds before searching for new transactions");
         await delay(60000);
     }
-
-    // Close the connection for good otherwise the program is going to pretend it's doing something which is annoying
-    connection.end();
 })();
 
